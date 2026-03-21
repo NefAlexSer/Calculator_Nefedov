@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="CalculatorLibrary/CalculatorLibrary.csproj" Id="235edd61-7401-4e98-b1fc-e6dd73224e3e" />
+  <Project Path="CalculatorTests/CalculatorTests.csproj" Id="d083bee7-e7ff-470a-b75e-c6daea107658" />
+  <Project Path="Calculator_Nefedov/Calculator_Nefedov.csproj" Id="09ac1331-16aa-4a32-98c5-6535eee8c971" />
+</Solution>
