@@ -23,113 +23,162 @@ namespace Calculator_Nefedov
     public partial class MainWindow : Window
     {
         private Calculator Calc = new Calculator();
+        double? currentValue;
+        string pendingOperation;
+        bool isNewInput = true;
+
         public MainWindow()
         {
             InitializeComponent();
+            ResultWindow.Text = "0";
         }
+
         private void ButtonLogic(object sender, RoutedEventArgs e)
         {
             Button button = (Button)sender;
-            if (CurInput.Length - 1 >= 0 && CurInput[CurInput.Length - 1] == '.' && (string)button.Content == ".")
-                return;
-            CurInput += button.Content;
+            string content = button.Content.ToString();
 
-            if (LastInput == "")
+            if (isNewInput)
             {
-                ResultWindow.Text = CurInput;
+                CurInput = "";
+                isNewInput = false;
+            }
+
+            
+            if (content == "." && CurInput.Contains("."))
+                return;
+
+            
+            if (CurInput == "0" && content != ".")
+            {
+                CurInput = content;
             }
             else
             {
-                ResultWindow.Text = LastInput + CurInput;
+                CurInput += content;
             }
-            
+
+            UpdateDisplay();
         }
+
         private void OperationLogic(string Op)
         {
-            if (Op == "-" && CurInput == "")
+            
+            if (!isNewInput && CurInput != "")
             {
-                CurInput += "-";
-                if (LastInput == "")
+                double currentNumber = double.Parse(CurInput, CultureInfo.InvariantCulture);
+
+                if (currentValue != null && pendingOperation != null)
                 {
-                    ResultWindow.Text = CurInput;
+                    currentValue = Calc.Calculate((double)currentValue, currentNumber, pendingOperation);
+                    CurInput = currentValue.ToString();
+                    UpdateDisplay();
                 }
                 else
                 {
-                    ResultWindow.Text = LastInput + CurInput;
+                    currentValue = currentNumber;
                 }
-                return;
             }
-            if (CurInput == "" & FirstArg == "")
-                return;
-            if (FirstArg == "" && CurInput != "-" && CurInput != ".")
+
+            if (Op == "-" && CurInput == "" && currentValue == null)
             {
-                FirstArg = CurInput;
-                Operation = Op;
-                CurInput += Operation;
-                LastInput = CurInput;
-                ResultWindow.Text = LastInput;
-                CurInput = "";
+                CurInput = "-";
+                isNewInput = false;
+                UpdateDisplay();
+                return;
             }
+
+            if (CurInput == "" && currentValue != null)
+            {
+                pendingOperation = Op;
+                return;
+            }
+
+            pendingOperation = Op;
+            isNewInput = true;
+
+            UpdateDisplay();
         }
 
-        string CurInput = "", Operation = "", FirstArg = "", SecondArg = "", LastInput = "", Result = "";
+        private string CurInput = "";
+
+        private void UpdateDisplay()
+        {
+            if (!isNewInput && !string.IsNullOrEmpty(CurInput))
+            {
+                ResultWindow.Text = CurInput;
+            }
+            else if (pendingOperation != null)
+            {
+                ResultWindow.Text = currentValue.ToString() + " " + pendingOperation;
+            }
+            else
+            {
+                ResultWindow.Text = currentValue.ToString();
+            }
+        }
 
         private void Plus_Click(object sender, RoutedEventArgs e)
         {
             OperationLogic("+");
         }
+
         private void Minus_Click(object sender, RoutedEventArgs e)
         {
             OperationLogic("-");
         }
+
         private void Multiply_Click(object sender, RoutedEventArgs e)
         {
             OperationLogic("*");
         }
+
         private void Divide_Click(object sender, RoutedEventArgs e)
         {
             OperationLogic("/");
         }
+
         private void Power_Click(object sender, RoutedEventArgs e)
         {
             OperationLogic("^");
         }
+
         private void Equals_Click(object sender, RoutedEventArgs e)
         {
-            if (FirstArg != "" && CurInput != ".")
+            if (pendingOperation != null && !isNewInput && CurInput != "")
             {
-                SecondArg = CurInput;
+                double currentNumber = double.Parse(CurInput, CultureInfo.InvariantCulture);
 
-                Result = Calc.Calculate(double.Parse(FirstArg, CultureInfo.InvariantCulture), double.Parse(SecondArg, CultureInfo.InvariantCulture), Operation).ToString();
-
-                ResultWindow.Text = Result;
-
-                CurInput = "";
-                Operation = "";
-                FirstArg = "";
-                SecondArg = "";
-                LastInput = "";
-                Result = "";
+                if (currentValue != null)
+                {
+                    double result = Calc.Calculate((double)currentValue, currentNumber, pendingOperation);
+                    currentValue = result;
+                    CurInput = result.ToString(CultureInfo.InvariantCulture);
+                    pendingOperation = null;
+                    isNewInput = true;
+                    ResultWindow.Text = CurInput;
+                }
             }
         }
         private void Clear_Click(object sender, RoutedEventArgs e)
         {
+            currentValue = null;
+            pendingOperation = null;
             CurInput = "";
-            Operation = "";
-            FirstArg = "";
-            SecondArg = "";
-            LastInput = "";
-            Result = "";
-            ResultWindow.Text = "";
+            isNewInput = true;
+            ResultWindow.Text = "0";
         }
+
         private void Button1_Click(object sender, RoutedEventArgs e)
         {
-            ButtonLogic(sender,e);
+            ButtonLogic(sender, e);
         }
+
         private void Button2_Click(object sender, RoutedEventArgs e)
         {
             ButtonLogic(sender, e);
         }
+
         private void Button3_Click(object sender, RoutedEventArgs e)
         {
             ButtonLogic(sender, e);
@@ -154,6 +203,7 @@ namespace Calculator_Nefedov
         {
             ButtonLogic(sender, e);
         }
+
         private void Button8_Click(object sender, RoutedEventArgs e)
         {
             ButtonLogic(sender, e);
